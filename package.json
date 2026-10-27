@@ -1,0 +1,12 @@
+{
+  "name": "beliefstate-agent-integrations",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "demo": "node examples/research-changes.mjs --demo",
+    "test": "node --test examples/research-changes.test.mjs"
+  }
+}

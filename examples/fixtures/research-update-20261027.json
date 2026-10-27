@@ -1,0 +1,132 @@
+{
+  "mode": "observed_workflow_summary",
+  "observed_at": "2026-10-27T18:49:28.470Z",
+  "ticker": "NBIS",
+  "provenance": "Selected fields from the two approved account REST test reads on October 27, 2026. This is a compact result summary, not a complete API envelope. Account identity, key, request IDs and opaque tokens are omitted.",
+  "account_reads": 2,
+  "status": "read_limit_reached",
+  "current": {
+    "returned_cases": 1,
+    "coverage": {
+      "available_belief_count": 36,
+      "omitted_belief_count": 35,
+      "unassessed_status_count": 123,
+      "unassessed_severity_count": 83,
+      "history_state": "unknown",
+      "selection_policy": "current-beliefs-v2",
+      "completeness": "bounded"
+    },
+    "case": {
+      "author": {
+        "id": "fce7924b-e4f0-4454-a70d-9676f1e1fd6b",
+        "name": "Lorenzo Bastianelli"
+      },
+      "direction": "bullish",
+      "thesis": "The author owns and is sticking with Nebius, ranking it second to SpaceX and ahead of IREN and CoreWeave without considering valuations. The case rests on faster sequential buildout acceleration than the other neocloud comparators, reported plans to deploy more than 1 GW annually from 2027, and a strategy of using financing contracts while developing its own end customers.",
+      "history_state": "unknown",
+      "qualifications": [
+        "Nebius remains slower than SpaceX in the author’s comparison. Its projected 2027 capacity rises from about 0.8–1.0 GW to 1.8–2.0+ GW, versus roughly 3 GW to 13 GW for SpaceX; these are different capacity measures, not like-for-like revenue forecasts.",
+        "The relative-growth model assumes equal construction and monetization capability and continued demand supporting higher compute prices. Capex is an imperfect proxy; CoreWeave still has higher absolute Capex, and IREN’s mining-asset conversions could reduce the capital required for its buildout. The author declines to forecast IREN’s GW capacity and allows that its acceleration could resemble Nebius or SpaceX.",
+        "Nebius still uses long-term investment-grade contracts to finance construction. The article contrasts this with SpaceX’s greater near-spot price participation; Nebius’s expected improvement in direct-customer demand optionality is a projection, not an established equivalent to SpaceX’s internal demand.",
+        "Power is the current industry constraint, third-party demand could eventually weaken, and finite physical resources are expected to reduce percentage growth after 2027. SpaceX’s proposed orbital-data-center exception is not an advantage the author attributes to Nebius.",
+        "The source gives no Nebius entry price, new purchase instruction, valuation-based target or exit rule. The disclosed current holding should not be converted into a new buy recommendation."
+      ],
+      "unknowns": [
+        {
+          "field": "history",
+          "reason": "earlier_source_coverage_is_not_verified_complete"
+        },
+        {
+          "field": "target",
+          "reason": "no_separately_grounded_target_in_current_projection"
+        }
+      ],
+      "sources": [
+        {
+          "source_url": "https://www.lorenzo2cents.com/p/spcx2026q3",
+          "source_title": "SpaceX Just Guided 10x More Compute Than Nebius. I Own Both. Here’s What I’m Doing.",
+          "source_coverage": "unknown"
+        }
+      ]
+    }
+  },
+  "journal": {
+    "window_started_at": "2026-10-26T00:00:00Z",
+    "returned_events": 7,
+    "events_by_domain": {
+      "author_view": 4,
+      "distribution": 2,
+      "calculated_publication_outcome": 1
+    },
+    "continuation_pending": true,
+    "polling_checkpoint_ready": false,
+    "history_coverage": {
+      "case_recorded": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "outcome_recorded": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "condition_assessed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "condition_recorded": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "case_review_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "subject_alias_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "author_intent_recorded": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "case_selection_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "condition_plan_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "source_lineage_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "source_quality_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "subject_release_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "author_revision_recorded": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "security_release_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      },
+      "subject_resolution_changed": {
+        "earliest_complete_at": "2026-10-05T01:10:35.641603Z",
+        "reconstructed": true
+      }
+    }
+  },
+  "limitations": [
+    "The workflow stopped at its two-read ceiling before fully draining the journal. The polling checkpoint was not advanced.",
+    "Journal events include distinct author-view, distribution and calculated-publication-outcome domains; seven events do not mean seven new or revised author theses.",
+    "Current coverage is bounded with omitted cases and unassessed risk/severity counts; current applicability and investor skill are not established by this example.",
+    "This dated snapshot is not a recommendation or a promise that a later run will return identical research."
+  ]
+}
