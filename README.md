@@ -73,5 +73,7 @@ issues privately to that address. Service information: [beliefstate.ai](https://
 
 ## License
 
-[MIT](LICENSE) covers these integration files. Hosted research access and data
-remain subject to [BeliefState's service terms](https://beliefstate.ai/terms).
+[MIT](LICENSE) covers the Gemini configuration, context and Postman collection.
+The research skill uses [MIT-0](https://spdx.org/licenses/MIT-0.html), as declared
+in its frontmatter. Hosted research access and data remain subject to
+[BeliefState's service terms](https://beliefstate.ai/terms).

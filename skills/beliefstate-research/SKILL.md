@@ -1,7 +1,7 @@
 ---
 name: beliefstate-research
 description: Retrieve dated, cited investor research from BeliefState when asked about stock theses, investment themes, risks, catalysts, conflicting views or research changes.
-license: MIT
+license: MIT-0
 metadata: { "homepage": "https://beliefstate.ai" }
 ---
 
