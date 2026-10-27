@@ -233,6 +233,10 @@ test("bad selectors and missing coverage stop before metered reads", async (t) =
     () => initialRequests("NBIS", "2099-01-01T00:00:00Z"),
     /future/,
   );
+  assert.throws(
+    () => initialRequests("NBIS", "2026-02-31T00:00:00Z"),
+    /valid calendar/,
+  );
   const { options, responses, requests, fetchImpl } = setup(t);
   responses[0] = { tickers: [] };
   await assert.rejects(

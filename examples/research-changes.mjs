@@ -34,6 +34,11 @@ export function initialRequests(ticker, since, checkpoint) {
       Number.isFinite(Date.parse(since)) && Date.parse(since) <= Date.now(),
       "Invalid or future --since timestamp.",
     );
+    assert.equal(
+      new Date(since).toISOString().slice(0, 19),
+      since.slice(0, 19),
+      "Use a valid calendar date in --since.",
+    );
   }
   return [
     url("/v1/brief", { ticker, detail: "current", max_results: "3" }),
