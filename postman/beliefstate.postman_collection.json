@@ -1,0 +1,134 @@
+{
+  "info": {
+    "name": "BeliefState: investor research API",
+    "description": "Explore free research discovery, current input/output contracts and unpaid x402 payment quotes. Hosted research reads require account access or an explicitly authorized wallet payment. Account MCP: https://beliefstate.ai/mcp. Wallet MCP: https://beliefstate.ai/v1/research/mcp. Setup: https://beliefstate.ai/agent-quickstart.md. This collection contains no payment signer or credentials.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://beliefstate.ai",
+      "type": "string"
+    },
+    {
+      "key": "ticker",
+      "value": "NBIS",
+      "type": "string"
+    },
+    {
+      "key": "beliefId",
+      "value": "643b446f-cbb3-4d09-9b48-40e83ae786ab",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Research catalog",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-BeliefState-Usage",
+            "value": "test"
+          }
+        ],
+        "url": "{{baseUrl}}/v1/research",
+        "description": "Free list of research operations, schemas and prices."
+      }
+    },
+    {
+      "name": "Find company coverage",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-BeliefState-Usage",
+            "value": "test"
+          }
+        ],
+        "url": "{{baseUrl}}/v1/tickers?q={{ticker}}",
+        "description": "Free company/ticker discovery. Coverage metadata is distinct from purchased research."
+      }
+    },
+    {
+      "name": "Investment case contract",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-BeliefState-Usage",
+            "value": "test"
+          }
+        ],
+        "url": "{{baseUrl}}/v1/research/get_belief",
+        "description": "Free input/output schema for an investment case."
+      }
+    },
+    {
+      "name": "Stock overview payment quote (no payment)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-BeliefState-Usage",
+            "value": "test"
+          }
+        ],
+        "url": "{{baseUrl}}/v1/brief/{{ticker}}",
+        "description": "Unsigned request returns HTTP 402 and payment requirements. No wallet signer or payment is configured."
+      },
+      "response": [
+        {
+          "name": "Unsigned 402 payment requirements",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-BeliefState-Usage",
+                "value": "test"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/brief/{{ticker}}",
+            "description": "Unsigned request returns HTTP 402 and payment requirements. No wallet signer or payment is configured."
+          },
+          "status": "Payment Required",
+          "code": 402,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"accepts\": [\n    {\n      \"amount\": \"20000\",\n      \"asset\": \"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913\",\n      \"extra\": {\n        \"assetTransferMethod\": \"eip3009\",\n        \"name\": \"USD Coin\",\n        \"version\": \"2\"\n      },\n      \"maxTimeoutSeconds\": 300,\n      \"network\": \"eip155:8453\",\n      \"payTo\": \"0xd346b16f2C013d8219350d32E511023D16Db9AEE\",\n      \"scheme\": \"exact\"\n    }\n  ],\n  \"error\": \"PAYMENT-SIGNATURE header is required\",\n  \"extensions\": {\n    \"mppx\": {\n      \"info\": {\n        \"method\": \"GET\",\n        \"_mppx_scope\": \"GET /v1/brief brief-x402-base-v1 8453 15ccfa6e0346d4b48864c0a4d49f12ef963ec6730cf0cadfb37cc457a748bd80\",\n        \"opaque\": \"eyJfbXBweF9zY29wZSI6IkdFVCAvdjEvYnJpZWYgYnJpZWYteDQwMi1iYXNlLXYxIDg0NTMgMTVjY2ZhNmUwMzQ2ZDRiNDg4NjRjMGE0ZDQ5ZjEyZWY5NjNlYzY3MzBjZjBjYWRmYjM3Y2M0NTdhNzQ4YmQ4MCJ9\"\n      },\n      \"schema\": {\n        \"additionalProperties\": false,\n        \"properties\": {\n          \"_mppx_scope\": {\n            \"type\": \"string\"\n          },\n          \"digest\": {\n            \"type\": \"string\"\n          },\n          \"method\": {\n            \"type\": \"string\"\n          },\n          \"nonce\": {\n            \"type\": \"string\"\n          },\n          \"opaque\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"method\"\n        ],\n        \"type\": \"object\"\n      }\n    },\n    \"bazaar\": {\n      \"info\": {\n        \"input\": {\n          \"type\": \"http\",\n          \"method\": \"GET\",\n          \"pathParams\": {\n            \"ticker\": \"NBIS\"\n          },\n          \"queryParams\": {\n            \"detail\": \"overview\",\n            \"max_results\": 5\n          }\n        },\n        \"output\": {\n          \"type\": \"json\",\n          \"example\": {\n            \"schema_version\": \"1\",\n            \"view\": \"overview\",\n            \"overview_version\": \"security-brief-overview-v1\",\n            \"generated_at\": \"2026-10-24T00:00:00.000Z\",\n            \"as_of\": \"2026-10-24T00:00:00.000Z\",\n            \"data_status\": {\n              \"mode\": \"preview\",\n              \"freshness\": \"delayed\",\n              \"coverage\": \"partial\",\n              \"latest_observation_at\": null,\n              \"limitations\": [\n                \"Illustrative response shape; not live research or a trading recommendation.\"\n              ]\n            },\n            \"security\": {\n              \"id\": \"example-security\",\n              \"ticker\": \"EXAMPLE\",\n              \"name\": \"Example Company\"\n            },\n            \"market_price\": {\n              \"status\": \"unavailable\",\n              \"basis\": \"adjusted_daily_close\",\n              \"reference\": null\n            },\n            \"coverage\": {\n              \"released_record_count\": 1,\n              \"returned_view_count\": 1,\n              \"omitted_record_count\": 0,\n              \"detail_available\": true\n            },\n            \"trade_state\": {\n              \"action\": \"WAIT\",\n              \"direction\": \"unclear\",\n              \"decision_mode\": \"no_directional_setup\",\n              \"reasons\": [\n                {\n                  \"text\": \"Illustrative format only; no investment assessment.\",\n                  \"truncated\": false\n                }\n              ],\n              \"watch_conditions\": [],\n              \"omitted_watch_condition_count\": 0,\n              \"setups\": []\n            },\n            \"views\": [\n              {\n                \"belief_id\": \"example-case\",\n                \"person\": {\n                  \"id\": \"example-investor\",\n                  \"name\": \"Example Investor\",\n                  \"handle\": null\n                },\n                \"direction\": \"mixed\",\n                \"status\": \"unknown\",\n                \"summary\": {\n                  \"text\": \"Illustrative thesis: capacity growth may support revenue; execution remains uncertain.\",\n                  \"truncated\": false\n                },\n                \"first_observed_at\": \"2026-10-23T12:00:00.000Z\",\n                \"latest_revision_at\": null,\n                \"support\": null,\n                \"risk\": null,\n                \"omitted_claim_count\": 0,\n                \"condition\": {\n                  \"validity\": \"unknown\",\n                  \"external_state\": \"unknown\",\n                  \"blockers\": [],\n                  \"omitted_blocker_count\": 0\n                },\n                \"source_citation_id\": \"example-citation\"\n              }\n            ],\n            \"chart\": null,\n            \"citations\": [\n              {\n                \"citation_id\": \"example-citation\",\n                \"evidence_id\": \"example-evidence\",\n                \"source_url\": \"https://example.com/illustrative-investment-case\",\n                \"source_title\": \"Illustrative research format\",\n                \"author_name\": \"Example Investor\",\n                \"published_at\": null,\n                \"observed_at\": \"2026-10-23T12:00:00.000Z\"\n              }\n            ],\n            \"warnings\": [\n              \"All entities and research text in this example are illustrative. Discover actual coverage at /v1/tickers.\"\n            ]\n          }\n        }\n      },\n      \"schema\": {\n        \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n        \"type\": \"object\",\n        \"required\": [\n          \"input\",\n          \"output\"\n        ],\n        \"properties\": {\n          \"input\": {\n            \"type\": \"object\",\n            \"additionalProperties\": false,\n            \"required\": [\n              \"type\",\n              \"method\",\n              \"queryParams\",\n              \"pathParams\"\n            ],\n            \"properties\": {\n              \"type\": {\n                \"type\": \"string\",\n                \"const\": \"http\"\n              },\n              \"method\": {\n                \"type\": \"string\",\n                \"const\": \"GET\"\n              },\n              \"pathParams\": {\n                \"type\": \"object\",\n                \"additionalProperties\": false,\n                \"required\": [\n                  \"ticker\"\n                ],\n                \"properties\": {\n                  \"ticker\": {\n                    \"type\": \"string\",\n                    \"minLength\": 1,\n                    \"maxLength\": 15,\n                    \"pattern\": \"^[A-Za-z0-9][A-Za-z0-9.-]{0,14}$\",\n                    \"description\": \"Released stock ticker from GET /v1/tickers.\"\n                  }\n                }\n              },\n              \"queryParams\": {\n                \"type\": \"object\",\n                \"additionalProperties\": false,\n                \"required\": [],\n                \"properties\": {\n                  \"detail\": {\n                    \"type\": \"string\",\n                    \"const\": \"overview\"\n                  },\n                  \"max_results\": {\n                    \"type\": \"integer\",\n                    \"minimum\": 1,\n                    \"maximum\": 5\n                  },\n                  \"as_of\": {\n                    \"type\": \"string\",\n                    \"format\": \"date-time\",\n                    \"maxLength\": 35\n                  }\n                }\n              }\n            }\n          },\n          \"output\": {\n            \"type\": \"object\",\n            \"required\": [\n              \"type\",\n              \"example\"\n            ],\n            \"properties\": {\n              \"type\": {\n                \"type\": \"string\",\n                \"const\": \"json\"\n              },\n              \"example\": {\n                \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n                \"type\": \"object\",\n                \"properties\": {\n                  \"schema_version\": {\n                    \"type\": \"string\",\n                    \"const\": \"1\"\n                  },\n                  \"view\": {\n                    \"type\": \"string\",\n                    \"const\": \"overview\"\n                  },\n                  \"generated_at\": {\n                    \"type\": \"string\",\n                    \"format\": \"date-time\",\n                    \"pattern\": \"^(?:(?:\\\\d\\\\d[2468][048]|\\\\d\\\\d[13579][26]|\\\\d\\\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\\\d|30)|(?:02)-(?:0[1-9]|1\\\\d|2[0-8])))T(?:(?:[01]\\\\d|2[0-3]):[0-5]\\\\d:[0-5]\\\\d(?:\\\\.\\\\d+)?(?:Z))$\"\n                  },\n                  \"as_of\": {\n                    \"type\": \"string\",\n                    \"format\": \"date-time\",\n                    \"pattern\": \"^(?:(?:\\\\d\\\\d[2468][048]|\\\\d\\\\d[13579][26]|\\\\d\\\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\\\d|30)|(?:02)-(?:0[1-9]|1\\\\d|2[0-8])))T(?:(?:[01]\\\\d|2[0-3]):[0-5]\\\\d:[0-5]\\\\d(?:\\\\.\\\\d+)?(?:Z))$\"\n                  },\n                  \"security\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                      \"id\": {\n                        \"type\": \"string\",\n                        \"minLength\": 1\n                      },\n                      \"ticker\": {\n                        \"type\": \"string\",\n                        \"minLength\": 1\n                      },\n                      \"name\": {\n                        \"type\": \"string\",\n                        \"minLength\": 1\n                      }\n                    },\n                    \"required\": [\n                      \"id\",\n                      \"ticker\",\n                      \"name\"\n                    ],\n                    \"additionalProperties\": false\n                  },\n                  \"coverage\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                      \"released_record_count\": {\n                        \"type\": \"integer\",\n                        \"minimum\": 0,\n                        \"maximum\": 9007199254740991\n                      },\n                      \"returned_view_count\": {\n                        \"type\": \"integer\",\n                        \"minimum\": 0,\n                        \"maximum\": 9007199254740991\n                      },\n                      \"omitted_record_count\": {\n                        \"type\": \"integer\",\n                        \"minimum\": 0,\n                        \"maximum\": 9007199254740991\n                      },\n                      \"detail_available\": {\n                        \"type\": \"boolean\",\n                        \"const\": true\n                      }\n                    },\n                    \"required\": [\n                      \"released_record_count\",\n                      \"returned_view_count\",\n                      \"omitted_record_count\",\n                      \"detail_available\"\n                    ],\n                    \"additionalProperties\": false\n                  },\n                  \"views\": {\n                    \"type\": \"array\",\n                    \"items\": {\n                      \"type\": \"object\",\n                      \"properties\": {\n                        \"belief_id\": {\n                          \"type\": \"string\",\n                          \"minLength\": 1\n                        },\n                        \"person\": {\n                          \"type\": \"object\",\n                          \"properties\": {\n                            \"id\": {\n                              \"type\": \"string\",\n                              \"minLength\": 1\n                            },\n                            \"name\": {\n                              \"type\": \"string\",\n                              \"minLength\": 1\n                            },\n                            \"handle\": {\n                              \"anyOf\": [\n                                {\n                                  \"type\": \"string\",\n                                  \"minLength\": 1\n                                },\n                                {\n                                  \"type\": \"null\"\n                                }\n                              ]\n                            }\n                          },\n                          \"required\": [\n                            \"id\",\n                            \"name\",\n                            \"handle\"\n                          ],\n                          \"additionalProperties\": false\n                        },\n                        \"direction\": {\n                          \"type\": \"string\",\n                          \"enum\": [\n                            \"bullish\",\n                            \"bearish\",\n                            \"mixed\",\n                            \"unclear\"\n                          ]\n                        },\n                        \"summary\": {\n                          \"type\": \"object\",\n                          \"properties\": {\n                            \"text\": {\n                              \"type\": \"string\",\n                              \"minLength\": 1\n                            },\n                            \"truncated\": {\n                              \"type\": \"boolean\"\n                            }\n                          },\n                          \"required\": [\n                            \"text\",\n                            \"truncated\"\n                          ],\n                          \"additionalProperties\": false\n                        },\n                        \"source_citation_id\": {\n                          \"type\": \"string\",\n                          \"minLength\": 1\n                        }\n                      },\n                      \"required\": [\n                        \"belief_id\",\n                        \"person\",\n                        \"direction\",\n                        \"summary\",\n                        \"source_citation_id\"\n                      ],\n                      \"additionalProperties\": {}\n                    }\n                  },\n                  \"citations\": {\n                    \"type\": \"array\",\n                    \"items\": {\n                      \"type\": \"object\",\n                      \"properties\": {\n                        \"citation_id\": {\n                          \"type\": \"string\",\n                          \"minLength\": 1\n                        },\n                        \"source_url\": {\n                          \"type\": \"string\",\n                          \"format\": \"uri\"\n                        },\n                        \"observed_at\": {\n                          \"type\": \"string\",\n                          \"format\": \"date-time\",\n                          \"pattern\": \"^(?:(?:\\\\d\\\\d[2468][048]|\\\\d\\\\d[13579][26]|\\\\d\\\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\\\d|30)|(?:02)-(?:0[1-9]|1\\\\d|2[0-8])))T(?:(?:[01]\\\\d|2[0-3]):[0-5]\\\\d:[0-5]\\\\d(?:\\\\.\\\\d+)?(?:Z))$\"\n                        }\n                      },\n                      \"required\": [\n                        \"citation_id\",\n                        \"source_url\",\n                        \"observed_at\"\n                      ],\n                      \"additionalProperties\": {}\n                    }\n                  }\n                },\n                \"required\": [\n                  \"schema_version\",\n                  \"view\",\n                  \"generated_at\",\n                  \"as_of\",\n                  \"security\",\n                  \"coverage\",\n                  \"views\",\n                  \"citations\"\n                ],\n                \"additionalProperties\": {},\n                \"$comment\": \"Permissive discovery projection. Complete response contract: https://beliefstate.ai/openapi.json#/components/schemas/X402BriefOverview\"\n              }\n            }\n          }\n        }\n      }\n    }\n  },\n  \"resource\": {\n    \"description\": \"Investor research and stock analysis for AI trading agents. This route buys up to five cited overview views for 0.02 USDC, with historical cutoffs. Discover all 16 research tools, their exact prices, free coverage and wallet MCP in the free catalog. Catalog: https://beliefstate.ai/v1/research. Full schemas: https://beliefstate.ai/openapi.json.\",\n    \"mimeType\": \"application/json\",\n    \"serviceName\": \"BeliefState\",\n    \"tags\": [\n      \"finance\",\n      \"investor-research\",\n      \"investment-research\",\n      \"stock-analysis\",\n      \"equity-research\"\n    ],\n    \"url\": \"https://beliefstate.ai/v1/brief/NBIS\"\n  },\n  \"x402Version\": 2\n}"
+        }
+      ]
+    },
+    {
+      "name": "Investment case payment quote (no payment)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-BeliefState-Usage",
+            "value": "test"
+          }
+        ],
+        "url": "{{baseUrl}}/v1/research/get_belief",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"belief_id\": \"{{beliefId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Unsigned request for one released case returns HTTP 402. No payment credential is included."
+      }
+    }
+  ]
+}
