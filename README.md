@@ -1,29 +1,84 @@
-# BeliefState agent integrations
+# BeliefState
 
-Connect your agent to cited investor theses, investment risks, catalysts and research changes.
+Bring cited investor theses, risks, catalysts and research changes into your AI through a hosted MCP server.
 
-- **Gemini CLI:** a remote MCP configuration using your BeliefState account.
-- **Research skill:** retrieval guidance for stock and investment-theme questions.
-- **HTTP examples:** a Postman collection for free discovery and unsigned x402 quotes.
-- **Research update workflow:** a dependency-free Node.js example for a current company snapshot and ordered research changes.
+- **Research with evidence:** read attributed investment cases with source links, dates and explicit coverage gaps.
+- **Compare views:** inspect differing theses, risks, conditions and publication-based outcomes.
+- **Follow changes:** retrieve dated case revisions, engine assessments and research journals with their separate clocks.
 
-## Quick start
+## Connection, authentication and pricing
 
-With Gemini CLI installed:
+Both research endpoints use **Streamable HTTP**. No local server or BeliefState SDK is required.
 
-```sh
-gemini extensions install https://github.com/Antcolombo/beliefstate-agent-integrations
+| Connection | Remote endpoint | Authentication and billing |
+| --- | --- | --- |
+| Account MCP | `https://beliefstate.ai/mcp` | OAuth for admitted clients, or `Authorization: Bearer` with your BeliefState API key. Research uses your account allowance or prepaid credits. |
+| Wallet MCP | `https://beliefstate.ai/v1/research/mcp` | An x402-capable client pays in USDC on Base (`eip155:8453`). No BeliefState account, API key or subscription is required. |
+
+Account pay-as-you-go access is **$20 for 500 nonexpiring credits** ($0.04 per successful research request). One AI question can make several requests. Subscription allowances and existing grants have their own terms; check [current account pricing](https://beliefstate.ai/pricing). Connecting a client or creating a key does not add research credit.
+
+Wallet pricing is separate: **fourteen data tools cost 0.02 USDC each**, `compare_beliefs` costs **0.50 USDC**, and `search_beliefs` costs **1.50 USDC** per call. Inspect the [live catalog and exact quotes](https://beliefstate.ai/v1/research) before authorizing payment. The wallet endpoint requires payment support; an ordinary OAuth-only client cannot pay its quotes.
+
+`get_tickers` and `search_companies` are free on both endpoints. Account-only `get_tracked_tickers` is also free. Browser OAuth availability depends on the client's admission; check [Connect AI](https://beliefstate.ai/connect?ai=other) before paying. The API-key setup below avoids assuming OAuth admission for a new client.
+
+[VS Code / GitHub Copilot](#vs-code--github-copilot) · [Tools](#mcp-tools) · [Research workflow](#run-a-company-research-update) · [Other integrations](#other-integrations) · [Support](#support) · [License](#license)
+
+## VS Code / GitHub Copilot
+
+Use a current VS Code installation with AI features enabled and a Copilot agent session. This uses the current portable Copilot configuration format and a BeliefState API key; no local MCP runtime is needed.
+
+1. Sign in to [BeliefState account setup](https://beliefstate.ai/account/setup) and obtain a developer API key for the account you want to use.
+2. Make the key available as `BELIEFSTATE_API_KEY` in the environment of the host running the agent, using your private secret manager. For a remote workspace or container, provide it there. Start VS Code from that environment; setting it in an unrelated terminal after VS Code starts is insufficient.
+3. Merge this configuration into your personal `~/.copilot/mcp-config.json` (or `mcp-config.json` inside `COPILOT_HOME` when set). Keep any existing server entries.
+
+```json
+{
+  "mcpServers": {
+    "beliefstate": {
+      "type": "http",
+      "url": "https://beliefstate.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer ${BELIEFSTATE_API_KEY}"
+      }
+    }
+  }
+}
 ```
 
-This installs a configuration example. Before authenticating, check your client's
-current admission at [connection setup](https://beliefstate.ai/connect?ai=other).
-Native Gemini OAuth and research delivery have not been verified for this package.
-Installing the extension or seeing authorization metadata does not establish
-access. If Gemini is admitted, run `/mcp auth beliefstate`, complete browser consent,
-check free coverage, then request research using your account allowance or credit.
-Use the [published Claude connector](https://claude.ai/directory/beliefstate) for
-that supported path, or the developer workflow below with your existing API key.
-See [account setup and pricing](https://beliefstate.ai/agent-quickstart.md).
+4. Start a new Copilot agent session. Open **Chat: Open Customizations > MCP Servers** to check `beliefstate`, and review any server-trust prompt. Enable its tools through **Chat: Open Customizations > Tools** if needed.
+5. Ask **“Which companies does BeliefState cover?”** Expand the tool result and confirm BeliefState's free `get_tickers` returned coverage. Then ask a normal research question, such as **“What's the investment case for Nebius?”**, when you want to use research credits.
+
+The free coverage call verifies discovery and authentication. A cited research answer additionally verifies research access and available allowance. A saved configuration or a plausible answer alone does not prove that a tool ran.
+
+These steps follow the current [VS Code setup guide](https://code.visualstudio.com/docs/agent-customization/mcp-servers) and [MCP configuration reference](https://code.visualstudio.com/docs/agents/reference/mcp-configuration). The older VS Code `servers`/`${input:...}` format is different: interactive inputs are not forwarded to Copilot harness sessions. Never put a literal key in shared configuration, source control or chat. On October 29, 2026, a standard MCP client authenticated to the account endpoint with a Bearer key, listed all 19 tools and completed the free `get_tickers` call. The VS Code steps follow its current configuration reference; the native editor lifecycle has not been separately tested.
+
+## MCP tools
+
+The account endpoint exposes the following 19 tools. The wallet endpoint exposes the same tools except `get_tracked_tickers`: 16 paid research tools and two free discovery tools. [Live server cards](https://beliefstate.ai/.well-known/mcp/server-cards.json) provide current tool names and descriptions.
+
+| Tool | What it does |
+| --- | --- |
+| `get_brief` | Read a company or ETF overview, or a bounded current thesis view with citations and gaps. |
+| `get_beliefs` | List dated investment cases filtered by company, subject, investor, direction or time. |
+| `get_belief` | Read one complete investment case and its permitted supporting evidence. |
+| `search_beliefs` | Find investment ideas by thesis, topic or trade setup with cited matching passages. |
+| `compare_beliefs` | Compare two cited cases for support, contradiction or dependency. |
+| `get_belief_risks` | Read structured, evidence-linked risks and their assessed or unknown status. |
+| `get_belief_catalysts` | Read evidence-linked catalysts and qualified condition statuses. |
+| `get_author_track_record` | Read stored publication-based outcomes, including losses, pending cases and coverage gaps. |
+| `search_entities` | Find released companies, industries, themes and other research subjects. |
+| `get_belief_changes` | Read an ordered journal of revisions, distribution changes and calculated outcomes, preserving each event's domain and dates. |
+| `get_context_assessment` | Read a dated engine assessment and its evidence, separate from an investor's stated view. |
+| `list_research_visuals` | List cited charts and tables for a case or assessment. |
+| `get_research_visual` | Read a chart or table, including exact rows or data points. |
+| `get_belief_relationships` | Inspect cited relationship paths within an investment case. |
+| `evaluate_belief_scenario` | Apply hypothetical conditions to a case's recorded model without changing its evidence. |
+| `refresh_market_data` | Explicitly refresh missing or stale market context, then return a brief; this is a paid research operation. |
+| `get_tickers` | List direct company research coverage and counts. Free. |
+| `search_companies` | Search the SEC company directory and check research availability. Free. |
+| `get_tracked_tickers` | Read the connected account's tracked companies. Free; account endpoint only. |
+
+Use source dates, citations and coverage warnings from the returned records. Publication-based outcomes are not verified brokerage executions; missing coverage remains unknown.
 
 ## Run a company research update
 
@@ -111,21 +166,20 @@ a crash requires confirming the old process has stopped before removing it.
 
 Run the offline safety checks with `npm test`.
 
-## Integration files
+## Other integrations
 
-| File                                                              | Purpose                                                                               |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [gemini-extension.json](gemini-extension.json)                    | Connect Gemini CLI to the account OAuth MCP endpoint.                                 |
-| [Research skill](skills/beliefstate-research/SKILL.md)            | Retrieve and explain attributed investor views with their dates, evidence and limits. |
-| [Postman collection](postman/beliefstate.postman_collection.json) | Import free discovery and unpaid quote requests into Postman.                         |
+| Resource | Purpose |
+| --- | --- |
+| [MCP setup and usage documentation](https://docs.beliefstate.ai/guides/mcp-server) | Account OAuth/API-key and wallet connection guidance. |
+| [Published Claude connector](https://claude.ai/directory/beliefstate) | Connect through Claude's supported directory path. |
+| [Research skill](skills/beliefstate-research/SKILL.md) | Retrieval guidance for stock and investment-theme questions. |
+| [Postman collection](postman/beliefstate.postman_collection.json) | Free discovery and unsigned x402 quote requests. |
+| [gemini-extension.json](gemini-extension.json) | Optional Gemini CLI configuration example; native authentication and research delivery remain unverified. |
+| [OpenAPI contract](https://beliefstate.ai/openapi.json) | Current REST schemas. |
 
-The skill can also be copied into a compatible client's skill directory. It
-provides instructions; access to the hosted research service is configured
-separately. Follow the client's own installation and authentication controls.
+Gemini is an optional configuration example, not the verified quick-start path. Check [current client availability](https://beliefstate.ai/connect?ai=other) before authenticating or paying. The research skill supplies instructions; hosted access must be configured separately. The Postman collection contains no credentials or payment signer.
 
-## Explore the API
-
-These requests are free and require no account or wallet:
+Explore free coverage and schemas without an account or wallet:
 
 ```sh
 curl --fail-with-body https://beliefstate.ai/v1/research
@@ -133,35 +187,9 @@ curl --fail-with-body 'https://beliefstate.ai/v1/tickers?q=NBIS'
 curl --fail-with-body https://beliefstate.ai/v1/research/get_belief
 ```
 
-The [catalog](https://beliefstate.ai/v1/research) lists all 16 paid research tools
-and exact prices: fourteen data tools at 0.02 USDC, comparison at 0.50 USDC and
-model-assisted search at 1.50 USDC per call on Base. The Postman quote requests
-return payment requirements and do not sign or submit payments.
+## Support
 
-## Connection options
-
-| Access      | Endpoint                                 | Authentication                                                             |
-| ----------- | ---------------------------------------- | -------------------------------------------------------------------------- |
-| Account MCP | `https://beliefstate.ai/mcp`             | OAuth through your MCP client.                                             |
-| Wallet MCP  | `https://beliefstate.ai/v1/research/mcp` | A compatible x402 wallet client and authorized payment for research reads. |
-| HTTP API    | `https://beliefstate.ai`                 | Account API access or the catalog's x402 routes.                           |
-
-Use the [OpenAPI contract](https://beliefstate.ai/openapi.json) and
-[MCP documentation](https://beliefstate.ai/docs/mcp-server.md) for current schemas.
-Keep credentials in your client's private secret storage. Shared collection
-variables contain no account credentials or payment authorizations.
-
-## Requirements and support
-
-Gemini CLI requires its supported runtime and local browser access for OAuth.
-Other clients need remote Streamable HTTP MCP or HTTP API support. Wallet access
-requires a client that supports BeliefState's x402 flow; this package does not
-add a payment signer. Client-specific sign-in and lifecycle checks remain
-separate from configuration validation.
-
-Report integration issues in this repository. For account or service issues,
-contact [support@beliefstate.ai](mailto:support@beliefstate.ai). Report security
-issues privately to that address. Service information: [beliefstate.ai](https://beliefstate.ai).
+Report integration issues in this repository. For account, service or private security reports, contact [support@beliefstate.ai](mailto:support@beliefstate.ai). See the [MCP setup guide](https://docs.beliefstate.ai/guides/mcp-server) for usage and [beliefstate.ai](https://beliefstate.ai) for service information.
 
 ## License
 
@@ -171,3 +199,4 @@ data terms and their stated provenance and limitations.
 The research skill uses [MIT-0](https://spdx.org/licenses/MIT-0.html), as declared
 in its frontmatter. Hosted research access and data remain subject to
 [BeliefState's service terms](https://beliefstate.ai/terms).
+
