@@ -1,5 +1,7 @@
 # BeliefState
 
+[![M8ven Score](https://m8ven.ai/badge/mcp/antcolombo-beliefstate-agent-integrations-14yb24?v=22eba6ff15b9deea5fc43a06130a3c8d)](https://m8ven.ai/mcp/antcolombo-beliefstate-agent-integrations-14yb24?s=readme)
+
 Bring cited investor theses, risks, catalysts and research changes into your AI through a hosted MCP server.
 
 - **Research with evidence:** read attributed investment cases with source links, dates and explicit coverage gaps.
