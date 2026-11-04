@@ -23,7 +23,7 @@ Wallet pricing is separate: **fourteen data tools cost 0.02 USDC each**, `compar
 
 `get_tickers` and `search_companies` are free on both endpoints. Account-only `get_tracked_tickers` is also free. Browser OAuth availability depends on the client's admission; check [Connect AI](https://beliefstate.ai/connect?ai=other) before paying. The API-key setup below avoids assuming OAuth admission for a new client.
 
-[VS Code / GitHub Copilot](#vs-code--github-copilot) · [Tools](#mcp-tools) · [Research workflow](#run-a-company-research-update) · [Other integrations](#other-integrations) · [Support](#support) · [License](#license)
+[VS Code / GitHub Copilot](#vs-code--github-copilot) · [Tools](#mcp-tools) · [Wallet starter](#run-a-wallet-funded-thesis-audit) · [Research workflow](#run-a-company-research-update) · [Other integrations](#other-integrations) · [Support](#support) · [License](#license)
 
 ## VS Code / GitHub Copilot
 
@@ -81,6 +81,90 @@ The account endpoint exposes the following 19 tools. The wallet endpoint exposes
 | `get_tracked_tickers` | Read the connected account's tracked companies. Free; account endpoint only. |
 
 Use source dates, citations and coverage warnings from the returned records. Publication-based outcomes are not verified brokerage executions; missing coverage remains unknown.
+
+## Run a wallet-funded thesis audit
+
+Use Node.js 22 or later on macOS or Linux. This example buys cited company research
+over HTTP using x402. It returns the research, source dates, coverage gaps and
+matching payment receipts for your own assessment. It does not execute trades or
+call a model. The default is one overview at **0.02 USDC**; optional case opens
+cost another 0.02 each. An overview already includes selected cases, so open more
+detail only when you need it.
+
+1. Clone this repository, enter it, and install the pinned dependencies:
+
+   ```sh
+   git clone https://github.com/Antcolombo/beliefstate-agent-integrations.git
+   cd beliefstate-agent-integrations
+   npm ci --ignore-scripts
+   npm test
+   ```
+
+2. Plan your requested company and spending cap without making network calls:
+
+   ```sh
+   node examples/wallet-thesis-audit.mjs --ticker NBIS --max-usdc 0.02
+   ```
+
+3. Check the live unsigned quote. This command cannot sign or pay:
+
+   ```sh
+   node examples/wallet-thesis-audit.mjs --ticker NBIS --max-usdc 0.02 --quote
+   ```
+
+4. Provide `PAYMENT_WALLET_PRIVATE_KEY` from your secret manager for a dedicated
+   programmatic buyer wallet with native USDC on Base. Never export a recovery
+   phrase or put keys in chat, source control, command arguments or shared logs.
+   The buyer wallet is separate from BeliefState's receiving wallet.
+
+5. Execute the approved purchase with a private state file:
+
+   ```sh
+   node examples/wallet-thesis-audit.mjs --ticker NBIS --max-usdc 0.02 \
+     --execute --state .private/nbis-wallet-audit.json
+   ```
+
+Execution checks free released coverage first and validates the quote's exact
+resource, receiving wallet, native USDC token, Base chain and price before signing.
+The full authorization is flushed to private state before dispatch. The state
+directory must be mode 700; its files must be mode 600. Keep the state private,
+including in backups. Research output and receipts also belong in your private
+workspace; payment signatures and keys are never printed.
+
+To request detail for up to two case IDs returned by the overview, plan a separate
+workflow with `--max-cases 2 --max-usdc 0.06` and a new state filename, then execute
+those same arguments. Choose this before starting; an existing state's ticker,
+cutoff, case limit and cap cannot change. The script reserves every signed
+purchase against the total cap, including unresolved attempts. It never uses
+illustrative discovery IDs or automatically buys model search/comparison.
+The cap covers service payments only; wallet funding, bridges and network fees
+are separate. Current quotes remain authoritative; changed terms stop execution.
+
+Use `--as-of 2026-10-27T12:00:00.000Z` for a requested historical UTC cutoff.
+Otherwise execution fixes its start time as the cutoff and retains it for every
+case and retry. Dates, source qualifications, omissions and unknowns remain in
+the returned research. No result is a claim of complete coverage or performance.
+
+If a request is pending, interrupted or fails receipt validation, **keep the same
+state and rerun the same command**. Recovery uses the saved exact method, URL,
+body and signature, without signing again; a replay-only run needs no private key.
+An expired authorization is still retained for recovery. Honor the saved
+`retry_after`/`retry_at`; the script prevents an early replay. Any unresolved
+purchase stops subsequent purchases, including on HTTP 402, 410 or 429. HTTP 410
+alone does not prove a refund; inspect the private response and resolve the
+purchase with support before authorizing another one. Do not delete or replace
+uncertain payment state. A completed run returns its saved output without network
+calls. Exit status 1 means the run stopped or reached its cap; inspect its status.
+
+An exclusive `.lock` prevents concurrent use of one state. After a hard process
+termination, confirm that no process still owns that exact state before removing
+only its `.lock`; preserve the payment state. Add `--test` for owner QA and retain
+it on every retry so those requests remain excluded from customer analytics.
+
+Dependencies are pinned to `@x402/core@2.28.0`, `@x402/evm@2.28.0` and
+`viem@2.57.10`. Offline tests use real SDK signatures with a public fixture key
+and a fake HTTP server function; they do not submit live payments. This starter
+does not add wallet signing to an MCP host; use an x402-capable host for wallet MCP.
 
 ## Run a company research update
 
