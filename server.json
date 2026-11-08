@@ -1,0 +1,45 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.beliefstate/investor-research",
+  "description": "25 account tools; 23 wallet tools (20 paid). Cited research, company facts, KPIs and guidance.",
+  "title": "BeliefState",
+  "repository": {
+    "url": "https://github.com/Antcolombo/beliefstate-agent-integrations",
+    "source": "github"
+  },
+  "version": "1.1.0",
+  "websiteUrl": "https://docs.beliefstate.ai/guides/mcp-server",
+  "icons": [
+    {
+      "src": "https://beliefstate.ai/brand/beliefstate-icon-bone.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "1024x1024"
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://beliefstate.ai/v1/research/mcp"
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://beliefstate.ai/mcp",
+      "headers": [
+        {
+          "description": "BeliefState account API key. Research uses your account allowance or prepaid credit.",
+          "value": "Bearer {api_key}",
+          "variables": {
+            "api_key": {
+              "description": "Create a BeliefState API key in your account settings. Keep it private.",
+              "isRequired": true,
+              "isSecret": true
+            }
+          },
+          "name": "Authorization"
+        }
+      ]
+    }
+  ]
+}

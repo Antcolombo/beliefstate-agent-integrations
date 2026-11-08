@@ -15,6 +15,12 @@ import {
 import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
+import {
+  makeRecoveryProof,
+  verifyRecoveryProof,
+  recoveryChallenge,
+  signRecoveryMessage,
+} from "./wallet-recovery.mjs";
 
 const origin = "https://beliefstate.ai";
 const network = "eip155:8453";
@@ -106,7 +112,7 @@ function requestFor(state, index) {
   if (index > Math.min(state.maxCases, ids.length)) return null;
   return {
     method: "POST",
-    url: `${origin}/v1/research/get_belief`,
+    url: `${origin}/v1/research/${state.version === 1 ? "get_belief" : "get_case"}`,
     body: JSON.stringify({ belief_id: ids[index - 1], as_of: state.asOf }),
   };
 }
@@ -335,7 +341,11 @@ function output(state, statePath) {
 
 export async function run(
   options,
-  { fetchImpl = fetch, signQuote = sign } = {},
+  {
+    fetchImpl = fetch,
+    signQuote = sign,
+    signRecovery = signRecoveryMessage,
+  } = {},
 ) {
   const ticker = (options.ticker ?? "").toUpperCase();
   assert(
@@ -351,7 +361,7 @@ export async function run(
   const requestedAsOf = options.asOf ? cutoff(options.asOf) : null;
   assert(!(options.quote && options.execute), "Choose --quote or --execute.");
   const initial = {
-    version: 1,
+    version: 2,
     ticker,
     maxCases,
     maxUsdc: options.maxUsdc,
@@ -389,8 +399,8 @@ export async function run(
   try {
     if (existsSync(statePath)) privateFile(statePath);
     const state = existsSync(statePath) ? read(statePath) : initial;
+    assert([1, 2].includes(state.version), "Unsupported saved state version.");
     for (const field of [
-      "version",
       "ticker",
       "maxCases",
       "maxUsdc",
@@ -477,18 +487,63 @@ export async function run(
         state.status = "awaiting_response";
         // Flush the complete signed request to disk before any payment dispatch.
         save(statePath, state);
+        operation.replayProof = await makeRecoveryProof(
+          operation,
+          signRecovery,
+        );
+        save(statePath, state);
+      }
+      if (
+        state.version === 2 &&
+        operation.status === "signed" &&
+        !operation.replayProof
+      ) {
+        operation.replayProof = await makeRecoveryProof(
+          operation,
+          signRecovery,
+        );
+        save(statePath, state);
       }
       if (operation.retryAt && Date.parse(operation.retryAt) > Date.now())
         break;
-      const response = await fetchImpl(operation.request.url, {
-        ...operation.request,
-        redirect: "error",
-        signal: AbortSignal.timeout(30000),
-        headers: {
-          ...headers(state.test),
-          "PAYMENT-SIGNATURE": operation.paymentSignature,
-        },
-      });
+      let usableProof =
+        operation.replayProof &&
+        decode(operation.replayProof).expires_at > Math.floor(Date.now() / 1000)
+          ? operation.replayProof
+          : null;
+      if (usableProof) await verifyRecoveryProof(operation, usableProof);
+      const dispatch = () =>
+        fetchImpl(operation.request.url, {
+          ...operation.request,
+          redirect: "error",
+          signal: AbortSignal.timeout(30000),
+          headers: {
+            ...headers(state.test),
+            "PAYMENT-SIGNATURE": operation.paymentSignature,
+            ...(usableProof ? { "BELIEFSTATE-REPLAY-PROOF": usableProof } : {}),
+          },
+        });
+      let response = await dispatch();
+      const challengeHeader = response.headers.get(
+        "BELIEFSTATE-REPLAY-CHALLENGE",
+      );
+      if (response.status === 401 && challengeHeader) {
+        operation.httpStatus = 401;
+        operation.recoveryChallenge = challengeHeader;
+        operation.status = "unresolved";
+        state.status = "needs_attention";
+        save(statePath, state);
+        await response.body?.cancel();
+        const challenge = recoveryChallenge(challengeHeader);
+        operation.replayProof = await makeRecoveryProof(
+          operation,
+          signRecovery,
+          challenge,
+        );
+        save(statePath, state);
+        usableProof = operation.replayProof;
+        response = await dispatch();
+      }
       operation.httpStatus = response.status;
       operation.retryAfter = response.headers.get("Retry-After");
       const retryTime = /^\d+$/.test(operation.retryAfter ?? "")

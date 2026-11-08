@@ -10,11 +10,13 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
+import { createHash } from "node:crypto";
 import { x402Client } from "@x402/core/client";
 import { encodePaymentSignatureHeader } from "@x402/core/http";
 import { ExactEvmScheme } from "@x402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
 import { run } from "./wallet-thesis-audit.mjs";
+import { researchScope, verifyRecoveryProof } from "./wallet-recovery.mjs";
 
 // Public fixture key: offline signatures only; never fund or use it for live requests.
 const fixtureKey = `0x${"11".repeat(32)}`;
@@ -95,7 +97,17 @@ function setup(t, extra = {}) {
         ],
         extensions: {
           bazaar: { info: { input: { type: "http", method: "POST" } } },
-          mppx: { info: { method: "POST", opaque: "fixture-request-binding" } },
+          mppx: {
+            info: {
+              method: "POST",
+              opaque: "fixture-request-binding",
+              _mppx_scope: researchScope({
+                method: "POST",
+                url,
+                body: init.body,
+              }),
+            },
+          },
         },
       });
       return Response.json(quote, {
@@ -109,6 +121,13 @@ function setup(t, extra = {}) {
     assert.equal(operation.paymentSignature, init.headers["PAYMENT-SIGNATURE"]);
     assert.equal(operation.request.body, init.body);
     assert.equal(operation.request.url, url);
+    if (init.headers["BELIEFSTATE-REPLAY-PROOF"]) {
+      assert.equal(
+        operation.replayProof,
+        init.headers["BELIEFSTATE-REPLAY-PROOF"],
+      );
+      await verifyRecoveryProof(operation, operation.replayProof);
+    }
     const next = controls.signedResponses.shift();
     if (next instanceof Error) throw next;
     if (next) return next;
@@ -173,7 +192,15 @@ function setup(t, extra = {}) {
       },
     });
   };
-  return { options, requests, signed, controls, fetchImpl, signQuote };
+  return {
+    options,
+    requests,
+    signed,
+    controls,
+    fetchImpl,
+    signQuote,
+    signRecovery: (message) => payer.signMessage({ message }),
+  };
 }
 
 test("plan is offline and an unsigned quote does not sign", async (t) => {
@@ -338,7 +365,7 @@ test("Retry-After prevents an early replay without another quote or signature", 
   assert.equal(f.signed.length, 1);
 });
 
-test("an expired authorization still replays its saved request without a new signature", async (t) => {
+test("an expired authorization retains its state and stops on410 without a new payment signature", async (t) => {
   const f = setup(t, { maxCases: 0 });
   f.controls.signedResponses.push(
     Response.json({ error: { code: "payment_pending" } }, { status: 503 }),
@@ -350,13 +377,20 @@ test("an expired authorization still replays its saved request without a new sig
       .validBefore,
   );
   t.mock.method(Date, "now", () => (validBefore + 10) * 1000);
+  f.controls.signedResponses.push(
+    Response.json(
+      { error: { code: "authorization_expired" } },
+      { status: 410 },
+    ),
+  );
   const done = await run(f.options, {
     fetchImpl: f.fetchImpl,
     signQuote: () => {
       throw Error("Do not re-sign an expired purchase");
     },
   });
-  assert.equal(done.status, "complete");
+  assert.equal(done.status, "needs_attention");
+  assert.equal(done.purchases[0].http_status, 410);
   assert.equal(f.signed.length, 1);
 });
 
@@ -466,5 +500,179 @@ test("changed saved request and completed response cannot trigger new signing", 
   const count = f.requests.length;
   await assert.rejects(run(f.options, f), /Saved request changed/);
   assert.equal(f.requests.length, count);
+  assert.equal(f.signed.length, 1);
+});
+
+function recoveryFor(
+  operation,
+  expires_at = Math.floor(Date.now() / 1000) + 300,
+) {
+  const payment = decode(operation.paymentSignature),
+    auth = payment.payload.authorization;
+  const purchase = createHash("sha256")
+    .update(
+      JSON.stringify([
+        payment.accepted.network,
+        payment.accepted.asset.toLowerCase(),
+        auth.from.toLowerCase(),
+        auth.nonce.toLowerCase(),
+      ]),
+    )
+    .digest("hex");
+  return {
+    expires_at,
+    message: [
+      "BeliefState x402 response recovery",
+      "Origin: https://beliefstate.ai",
+      "Network: eip155:8453",
+      `Recipient: ${auth.to.toLowerCase()}`,
+      `Purchase: x402_${purchase}`,
+      `Scope: ${researchScope(operation.request)}`,
+      `Expires: ${expires_at}`,
+    ].join("\n"),
+  };
+}
+async function pendingLegacy(t) {
+  const f = setup(t, { maxCases: 0, maxUsdc: "0.02" });
+  f.controls.signedResponses.push(
+    Response.json({ error: { code: "payment_pending" } }, { status: 503 }),
+  );
+  await run(f.options, f);
+  const saved = JSON.parse(readFileSync(f.options.state));
+  saved.version = 1;
+  delete saved.operations[0].replayProof;
+  writeFileSync(f.options.state, JSON.stringify(saved));
+  return { f, original: saved.operations[0] };
+}
+test("new case purchases use canonical names while saved v1 workflows keep their raw paths", async (t) => {
+  const modern = setup(t);
+  await run(modern.options, modern);
+  const saved = JSON.parse(readFileSync(modern.options.state));
+  assert.equal(saved.version, 2);
+  assert(saved.operations[1].request.url.endsWith("/get_case"));
+  const old = setup(t);
+  writeFileSync(
+    old.options.state,
+    JSON.stringify({
+      version: 1,
+      ticker: "NBIS",
+      maxCases: 2,
+      maxUsdc: "0.06",
+      requestedAsOf: asOf,
+      asOf,
+      test: true,
+      operations: [],
+      status: "ready",
+    }),
+    { mode: 0o600 },
+  );
+  await run(old.options, old);
+  assert(
+    JSON.parse(
+      readFileSync(old.options.state),
+    ).operations[1].request.url.endsWith("/get_belief"),
+  );
+});
+test("a legacy401 signs only a fresh private recovery proof and resends the identical purchase", async (t) => {
+  const { f, original } = await pendingLegacy(t);
+  const challenge = recoveryFor(original);
+  f.controls.signedResponses.push(
+    Response.json(
+      { error: { code: "replay_proof_required" } },
+      {
+        status: 401,
+        headers: { "BELIEFSTATE-REPLAY-CHALLENGE": encode(challenge) },
+      },
+    ),
+  );
+  let signed = 0;
+  const result = await run(f.options, {
+    fetchImpl: f.fetchImpl,
+    signQuote: () => {
+      throw Error("No second payment authorization");
+    },
+    signRecovery: (message) => {
+      signed++;
+      assert.equal(message, challenge.message);
+      return payer.signMessage({ message });
+    },
+  });
+  assert.equal(result.status, "complete");
+  assert.equal(signed, 1);
+  assert.equal(f.signed.length, 1);
+  const operation = JSON.parse(readFileSync(f.options.state)).operations[0];
+  assert.equal(operation.paymentSignature, original.paymentSignature);
+  assert.deepEqual(operation.request, original.request);
+  assert(!JSON.stringify(result).includes(operation.replayProof));
+  assert(!JSON.stringify(result).includes(original.paymentSignature));
+});
+for (const change of ["origin", "scope", "expired", "future"]) {
+  test(`untrusted ${change} recovery challenge stops before wallet signing`, async (t) => {
+    const { f, original } = await pendingLegacy(t);
+    const challenge = recoveryFor(original);
+    if (change === "origin")
+      challenge.message = challenge.message.replace(
+        "https://beliefstate.ai",
+        "https://example.com",
+      );
+    if (change === "scope") challenge.message += " extra scope";
+    if (change === "expired")
+      challenge.expires_at = Math.floor(Date.now() / 1000) - 1;
+    if (change === "future") challenge.expires_at += 1;
+    f.controls.signedResponses.push(
+      Response.json(
+        {},
+        {
+          status: 401,
+          headers: { "BELIEFSTATE-REPLAY-CHALLENGE": encode(challenge) },
+        },
+      ),
+    );
+    let attempts = 0;
+    await assert.rejects(
+      run(f.options, {
+        fetchImpl: f.fetchImpl,
+        signQuote: () => {
+          throw Error("No new payment");
+        },
+        signRecovery: () => {
+          attempts++;
+          throw Error("Unexpected signing");
+        },
+      }),
+      /[Rr]ecovery/,
+    );
+    assert.equal(attempts, 0);
+    assert.equal(f.signed.length, 1);
+    assert.equal(
+      JSON.parse(readFileSync(f.options.state)).operations[0].paymentSignature,
+      original.paymentSignature,
+    );
+  });
+}
+test("the wrong recovery wallet cannot replace a saved paying-wallet authorization", async (t) => {
+  const { f, original } = await pendingLegacy(t);
+  f.controls.signedResponses.push(
+    Response.json(
+      {},
+      {
+        status: 401,
+        headers: {
+          "BELIEFSTATE-REPLAY-CHALLENGE": encode(recoveryFor(original)),
+        },
+      },
+    ),
+  );
+  const other = privateKeyToAccount(`0x${"22".repeat(32)}`);
+  await assert.rejects(
+    run(f.options, {
+      fetchImpl: f.fetchImpl,
+      signQuote: () => {
+        throw Error("No new payment");
+      },
+      signRecovery: (message) => other.signMessage({ message }),
+    }),
+    /original payer/,
+  );
   assert.equal(f.signed.length, 1);
 });

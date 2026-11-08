@@ -1,7 +1,7 @@
 {
   "name": "beliefstate-agent-integrations",
-  "version": "1.0.0",
-  "description": "Retrieve cited investor theses, risks, catalysts and research changes through BeliefState.",
+  "version": "1.1.0",
+  "description": "Cited investor research and source-linked company data through BeliefState.",
   "mcpServers": {
     "beliefstate": {
       "httpUrl": "https://beliefstate.ai/mcp"
