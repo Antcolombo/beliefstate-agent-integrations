@@ -1,6 +1,6 @@
 {
   "version": "beliefstate-distribution-catalog-v1",
-  "source_commit": "466c2a92d026d5da754908478af45aff0c62b8b0",
+  "source_commit": "af171a20c055def821c5ffa39221fcde72228a14",
   "api_contract_version": "2026-11-08",
   "mcp_server_version": "0.6.0",
   "account_tools": [
