@@ -40,7 +40,9 @@ const rows = tools.map((tool) => {
       : "Free; account only";
   return `| \`${tool.name}\` | ${description.replaceAll("|", "\\|")} | ${access} |`;
 });
-const table = `The account endpoint exposes **${tools.length} tools**. Wallet MCP exposes **${catalog.wallet_tools.length} tools**: ${paid.size} paid research tools and ${free.length} free discovery tools. A2A advertises ${catalog.a2a_tools.length} research and discovery capabilities. Call \`tools/list\` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
+const table = `The account endpoint exposes **${tools.length} tools**. Wallet MCP exposes **${catalog.wallet_tools.length} tools**: ${paid.size} paid research tools and ${free.length} free discovery tools. Call \`tools/list\` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
+
+The prepared A2A package defines ${catalog.a2a_tools.length} capabilities. Public A2A discovery requires separate OAuth and release admission; the hosted card currently returns 404.
 
 The account transport can advertise research context, model and conversation fields for analytics. Clients that send \`DNT: 1\` or \`Sec-GPC: 1\` receive the base schemas in this catalog. Keep personal details and credentials out of context.
 

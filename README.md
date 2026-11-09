@@ -59,7 +59,9 @@ These steps follow the current [VS Code setup guide](https://code.visualstudio.c
 ## MCP tools
 
 <!-- BEGIN TOOL CATALOG -->
-The account endpoint exposes **25 tools**. Wallet MCP exposes **23 tools**: 20 paid research tools and 3 free discovery tools. A2A advertises 23 research and discovery capabilities. Call `tools/list` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
+The account endpoint exposes **25 tools**. Wallet MCP exposes **23 tools**: 20 paid research tools and 3 free discovery tools. Call `tools/list` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
+
+The prepared A2A package defines 23 capabilities. Public A2A discovery requires separate OAuth and release admission; the hosted card currently returns 404.
 
 The account transport can advertise research context, model and conversation fields for analytics. Clients that send `DNT: 1` or `Sec-GPC: 1` receive the base schemas in this catalog. Keep personal details and credentials out of context.
 
