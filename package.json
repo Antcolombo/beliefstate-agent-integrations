@@ -7,7 +7,8 @@
   },
   "scripts": {
     "demo": "node examples/research-changes.mjs --demo",
-    "test": "node --test examples/*.test.mjs"
+    "test": "node --test examples/*.test.mjs",
+    "sync:catalog": "node scripts/sync-catalog.mjs"
   },
   "dependencies": {
     "@x402/core": "2.28.0",
