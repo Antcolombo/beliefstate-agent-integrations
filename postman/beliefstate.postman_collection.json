@@ -47,7 +47,7 @@
       }
     },
     {
-      "name": "MCP server cards",
+      "name": "Account MCP authentication",
       "request": {
         "method": "GET",
         "header": [
@@ -56,8 +56,8 @@
             "value": "test"
           }
         ],
-        "url": "{{baseUrl}}/.well-known/mcp/server-cards.json",
-        "description": "Account and wallet inventory."
+        "url": "{{baseUrl}}/.well-known/oauth-protected-resource/mcp",
+        "description": "Public OAuth discovery metadata for account MCP."
       }
     },
     {

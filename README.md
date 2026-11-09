@@ -17,7 +17,7 @@ Both research endpoints use **Streamable HTTP**. No local server or BeliefState 
 | Account MCP | `https://beliefstate.ai/mcp`             | OAuth for admitted clients, or `Authorization: Bearer` with your BeliefState API key. Research uses your account allowance or prepaid credits. |
 | Wallet MCP  | `https://beliefstate.ai/v1/research/mcp` | An x402-capable client pays in USDC on Base (`eip155:8453`). No BeliefState account, API key or subscription is required.                      |
 
-Account pay-as-you-go access is **$20 for 500 nonexpiring credits** ($0.04 per successful research request). One AI question can make several requests. Subscription allowances and existing grants have their own terms; check [current account pricing](https://beliefstate.ai/pricing). Connecting a client or creating a key does not add research credit.
+Account pay-as-you-go access is **$20 for 1,000 standard research requests** ($0.02 per successful request with nonexpiring prepaid credit). One AI question can make several requests. Subscription allowances and existing grants have their own terms; check [current account pricing](https://beliefstate.ai/pricing). Connecting a client or creating a key does not add research credit.
 
 <!-- BEGIN CATALOG PRICING -->
 Wallet pricing is separate: **18 data tools cost 0.02 USDC each**, `get_comparison` costs **0.50 USDC**, and `get_search_results` costs **1.50 USDC** per call. Inspect the [live catalog and exact quotes](https://beliefstate.ai/v1/research) before authorizing payment. Account research uses the separate account prices above.
@@ -54,12 +54,14 @@ Use a current VS Code installation with AI features enabled and a Copilot agent 
 
 The free coverage call verifies discovery and authentication. A cited research answer additionally verifies research access and available allowance. A saved configuration or a plausible answer alone does not prove that a tool ran.
 
-These steps follow the current [VS Code setup guide](https://code.visualstudio.com/docs/agent-customization/mcp-servers) and [MCP configuration reference](https://code.visualstudio.com/docs/agents/reference/mcp-configuration). The older VS Code `servers`/`${input:...}` format is different: interactive inputs are not forwarded to Copilot harness sessions. Never put a literal key in shared configuration, source control or chat. On October 29, 2026, a standard MCP client authenticated to the account endpoint with a Bearer key, listed all 19 tools and completed the free `get_tickers` call. The VS Code steps follow its current configuration reference; the native editor lifecycle has not been separately tested.
+These steps follow the current [VS Code setup guide](https://code.visualstudio.com/docs/agent-customization/mcp-servers) and [MCP configuration reference](https://code.visualstudio.com/docs/agents/reference/mcp-configuration). The older VS Code `servers`/`${input:...}` format is different: interactive inputs are not forwarded to Copilot harness sessions. Never put a literal key in shared configuration, source control or chat. On November 8, 2026, a standard MCP client authenticated with a Bearer key, verified all 25 live schemas and completed the free `get_account_status` call. The native editor lifecycle has not been separately tested.
 
 ## MCP tools
 
 <!-- BEGIN TOOL CATALOG -->
-The account endpoint exposes **25 tools**. Wallet MCP exposes **23 tools**: 20 paid research tools and 3 free discovery tools. A2A advertises 23 research and discovery capabilities. [Live server cards](https://beliefstate.ai/.well-known/mcp/server-cards.json) provide current names, descriptions and input/output schemas.
+The account endpoint exposes **25 tools**. Wallet MCP exposes **23 tools**: 20 paid research tools and 3 free discovery tools. A2A advertises 23 research and discovery capabilities. Call `tools/list` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
+
+The account transport can advertise research context, model and conversation fields for analytics. Clients that send `DNT: 1` or `Sec-GPC: 1` receive the base schemas in this catalog. Keep personal details and credentials out of context.
 
 | Tool | What it does | Access |
 | --- | --- | --- |
@@ -239,12 +241,10 @@ saved nor printed. Use `--test` for owner diagnostics; ordinary customer usage
 should omit it.
 
 `--max-reads` caps total account research dispatches in that state file, including
-an uncertain dispatch. At the October 27 account pay-as-you-go rate, two reads
-use $0.08 of credit; plan allowances and legacy policies can differ. This is a
-read-count ceiling, not a currency authorization. Wallet x402 data reads have
-their separate 0.02-USDC price. This script uses account REST and signs no wallet
-payments; the [existing x402 quickstart](https://beliefstate.ai/agent-quickstart.md#pay-per-call-with-x402)
-owns that path.
+an uncertain dispatch. At the standard prepaid rate, two successful reads use
+$0.04 of credit. Plan allowances and grants have their own terms. This script
+uses account REST. See the [MCP connection guide](https://docs.beliefstate.ai/guides/mcp-server)
+for wallet access and prices.
 
 If the journal has another page, the script saves the continuation and stops at
 the read ceiling. Resume the identical command with the same state file and a

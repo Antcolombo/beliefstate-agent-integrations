@@ -40,7 +40,9 @@ const rows = tools.map((tool) => {
       : "Free; account only";
   return `| \`${tool.name}\` | ${description.replaceAll("|", "\\|")} | ${access} |`;
 });
-const table = `The account endpoint exposes **${tools.length} tools**. Wallet MCP exposes **${catalog.wallet_tools.length} tools**: ${paid.size} paid research tools and ${free.length} free discovery tools. A2A advertises ${catalog.a2a_tools.length} research and discovery capabilities. [Live server cards](https://beliefstate.ai/.well-known/mcp/server-cards.json) provide current names, descriptions and input/output schemas.
+const table = `The account endpoint exposes **${tools.length} tools**. Wallet MCP exposes **${catalog.wallet_tools.length} tools**: ${paid.size} paid research tools and ${free.length} free discovery tools. A2A advertises ${catalog.a2a_tools.length} research and discovery capabilities. Call \`tools/list\` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
+
+The account transport can advertise research context, model and conversation fields for analytics. Clients that send \`DNT: 1\` or \`Sec-GPC: 1\` receive the base schemas in this catalog. Keep personal details and credentials out of context.
 
 | Tool | What it does | Access |
 | --- | --- | --- |
@@ -113,10 +115,10 @@ const collection = {
     ),
     request("OpenAPI", "GET", "/openapi.json", "Current REST contract."),
     request(
-      "MCP server cards",
+      "Account MCP authentication",
       "GET",
-      "/.well-known/mcp/server-cards.json",
-      "Account and wallet inventory.",
+      "/.well-known/oauth-protected-resource/mcp",
+      "Public OAuth discovery metadata for account MCP.",
     ),
     request(
       "Find company coverage",

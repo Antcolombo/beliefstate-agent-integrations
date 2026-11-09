@@ -10,4 +10,4 @@ metadata: { "homepage": "https://beliefstate.ai" }
 Use the existing account MCP connection at `https://beliefstate.ai/mcp`.
 The hosted tools supply their current names, typed schemas and research guidance.
 Research uses account allowance or prepaid credits; discovery is free.
-Connection instructions and wallet access: https://beliefstate.ai/agent-quickstart.md.
+Connection instructions and wallet access: https://docs.beliefstate.ai/guides/mcp-server.
