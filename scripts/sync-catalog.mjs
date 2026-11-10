@@ -28,9 +28,12 @@ const cheap = catalog.paid_operations.filter(
   (operation) => operation.price_cents === 2,
 ).length;
 const free = catalog.wallet_tools.filter((name) => !paid.has(name));
+const accountOnlyFree = names.filter(
+  (name) => !paid.has(name) && !catalog.wallet_tools.includes(name),
+);
 const pricing = `Wallet pricing is separate: **${cheap} data tools cost 0.02 USDC each**, \`get_comparison\` costs **${amount("get_comparison")}**, and \`get_search_results\` costs **${amount("get_search_results")}** per call. Inspect the [live catalog and exact quotes](https://beliefstate.ai/v1/research) before authorizing payment. Account research uses the separate account prices above.
 
-${free.map((name) => `\`${name}\``).join(", ")} are free on both endpoints. Account-only \`get_research_sample\` and \`get_account_status\` are also free. Account tracking uses \`get_tickers(tracked_only=true)\`. \`get_news\` returns SEC filing metadata; it is not a general news-headline feed. Browser OAuth availability depends on the client's admission; check [Connect AI](https://beliefstate.ai/connect?ai=other) before paying.`;
+${free.map((name) => `\`${name}\``).join(", ")} are free on both endpoints. Free account-only tools include ${accountOnlyFree.map((name) => `\`${name}\``).join(", ")}. Account tracking uses \`get_tickers(tracked_only=true)\`. \`get_news\` returns SEC filing metadata. Set \`include_earnings: true\` to include issuer-announced schedules when supported by SEC evidence. Use a news source for general headlines. Browser OAuth availability depends on the client's admission; check [Connect AI](https://beliefstate.ai/connect?ai=other) before paying.`;
 const rows = tools.map((tool) => {
   const description = tool.description.split(/\.\s/)[0] + ".";
   const access = paid.has(tool.name)
@@ -70,7 +73,7 @@ for (const [marker, body] of [
 writeFileSync("README.md", readme);
 const server = JSON.parse(readFileSync("server.json", "utf8"));
 assert.equal(server.name, "ai.beliefstate/investor-research");
-server.description = `${tools.length} account tools; ${catalog.wallet_tools.length} wallet tools (${paid.size} paid). Cited research, company facts, KPIs and guidance.`;
+server.description = `${tools.length} account tools; ${catalog.wallet_tools.length} wallet tools (${paid.size} paid). Free company snapshots and cited research.`;
 assert(server.description.length <= 100);
 writeFileSync("server.json", JSON.stringify(server, null, 2) + "\n");
 const testHeader = [{ key: "X-BeliefState-Usage", value: "test" }];
@@ -129,11 +132,11 @@ const collection = {
       "Free company/ticker discovery.",
     ),
     request(
-      "SEC filing news",
+      "SEC filings and earnings",
       "POST",
       "/v1/research/news",
-      "Free official SEC filing metadata; no account, payment or model call.",
-      { ticker: "{{ticker}}", limit: 5 },
+      "Free official SEC filings and issuer-announced earnings schedules when supported by SEC evidence.",
+      { ticker: "{{ticker}}", limit: 5, include_earnings: true },
     ),
     ...catalog.paid_operations.map((operation) =>
       request(

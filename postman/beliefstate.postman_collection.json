@@ -75,7 +75,7 @@
       }
     },
     {
-      "name": "SEC filing news",
+      "name": "SEC filings and earnings",
       "request": {
         "method": "POST",
         "header": [
@@ -89,10 +89,10 @@
           }
         ],
         "url": "{{baseUrl}}/v1/research/news",
-        "description": "Free official SEC filing metadata; no account, payment or model call.",
+        "description": "Free official SEC filings and issuer-announced earnings schedules when supported by SEC evidence.",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"ticker\": \"{{ticker}}\",\n  \"limit\": 5\n}",
+          "raw": "{\n  \"ticker\": \"{{ticker}}\",\n  \"limit\": 5,\n  \"include_earnings\": true\n}",
           "options": {
             "raw": {
               "language": "json"

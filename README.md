@@ -22,7 +22,7 @@ Account pay-as-you-go access is **$20 for 1,000 standard research requests** ($0
 <!-- BEGIN CATALOG PRICING -->
 Wallet pricing is separate: **18 data tools cost 0.02 USDC each**, `get_comparison` costs **0.50 USDC**, and `get_search_results` costs **1.50 USDC** per call. Inspect the [live catalog and exact quotes](https://beliefstate.ai/v1/research) before authorizing payment. Account research uses the separate account prices above.
 
-`get_companies`, `get_news`, `get_tickers` are free on both endpoints. Account-only `get_research_sample` and `get_account_status` are also free. Account tracking uses `get_tickers(tracked_only=true)`. `get_news` returns SEC filing metadata; it is not a general news-headline feed. Browser OAuth availability depends on the client's admission; check [Connect AI](https://beliefstate.ai/connect?ai=other) before paying.
+`get_companies`, `get_news`, `get_tickers` are free on both endpoints. Free account-only tools include `get_account_status`, `get_company_snapshot`, `get_research_sample`. Account tracking uses `get_tickers(tracked_only=true)`. `get_news` returns SEC filing metadata. Set `include_earnings: true` to include issuer-announced schedules when supported by SEC evidence. Use a news source for general headlines. Browser OAuth availability depends on the client's admission; check [Connect AI](https://beliefstate.ai/connect?ai=other) before paying.
 <!-- END CATALOG PRICING -->
 
 [VS Code / GitHub Copilot](#vs-code--github-copilot) · [Tools](#mcp-tools) · [Wallet starter](#run-a-wallet-funded-thesis-audit) · [Research workflow](#run-a-company-research-update) · [Other integrations](#other-integrations) · [Support](#support) · [License](#license)
@@ -58,8 +58,14 @@ These steps follow the current [VS Code setup guide](https://code.visualstudio.c
 
 ## MCP tools
 
+Start a question about a specific stock with the free account tool
+`get_company_snapshot`. It returns available dated price and financial data,
+primary disclosures, and direct or related research coverage. When it returns a
+related case with an opening price, show the cost before opening the case.
+Use a live market data source for live quotes.
+
 <!-- BEGIN TOOL CATALOG -->
-The account endpoint exposes **25 tools**. Wallet MCP exposes **23 tools**: 20 paid research tools and 3 free discovery tools. Call `tools/list` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
+The account endpoint exposes **26 tools**. Wallet MCP exposes **23 tools**: 20 paid research tools and 3 free discovery tools. Call `tools/list` on the connected MCP endpoint for its current names, descriptions and schemas. The [wallet HTTP catalog](https://beliefstate.ai/v1/research) shows the current purchase contracts and prices.
 
 The prepared A2A package defines 23 capabilities. Public A2A discovery requires separate OAuth and release admission; the hosted card currently returns 404.
 
@@ -73,8 +79,9 @@ The account transport can advertise research context, model and conversation fie
 | `get_cases` | Retrieves dated investment cases for one company or research subject, with optional investor, direction and time filters. | 0.02 USDC (wallet); account billing |
 | `get_catalysts` | Retrieves evidence-linked catalysts for one company, research subject, investment case or the explicitly selected released corpus. | 0.02 USDC (wallet); account billing |
 | `get_changes` | Retrieves the ordered research change journal for a company, subject, case or explicitly selected released corpus. | 0.02 USDC (wallet); account billing |
-| `get_companies` | Retrieves matching SEC-registered US companies by ticker or company name. | Free |
+| `get_companies` | Find SEC-registered U.S. | Free |
 | `get_company_facts` | Retrieves retained financial facts, company references, segment metrics, operating KPIs and management guidance for one ticker. | 0.02 USDC (wallet); account billing |
+| `get_company_snapshot` | Use this when a user asks about an identifiable stock, including whether it is worth buying, its outlook, why it moved recently, when it reports earnings, or what its latest results show. | Free; account only |
 | `get_comparison` | Retrieves a cited engine comparison of two distinct investment cases using their returned belief_id and compare_to_belief_id. | 0.50 USDC (wallet); account billing |
 | `get_context_assessment` | Retrieves a dated engine context assessment by its returned assessment identifier, including permitted supporting evidence and coverage limitations. | 0.02 USDC (wallet); account billing |
 | `get_economic_calendar` | Retrieves retained US economic events in one ticker research scope. | 0.02 USDC (wallet); account billing |
@@ -83,14 +90,14 @@ The account transport can advertise research context, model and conversation fie
 | `get_investor_outcomes` | Retrieves an investor's stored publication-based outcomes for one company, research subject, investment case or the explicitly selected released corpus. | 0.02 USDC (wallet); account billing |
 | `get_macro_context` | Retrieves retained government macroeconomic observations in one ticker research scope. | 0.02 USDC (wallet); account billing |
 | `get_market_returns` | Retrieves supported split-adjusted close-price returns for one ticker versus SPY. | 0.02 USDC (wallet); account billing |
-| `get_news` | Retrieves recent SEC filing metadata for one verified ticker: forms, filing and acceptance dates, official SEC links and the last observation time. | Free |
+| `get_news` | Retrieves recent SEC filings for one verified ticker, including filing and acceptance dates, official links and the last observation time. | Free |
 | `get_options_activity` | Retrieves retained options bars, flow aggregates and open interest for one ticker. | 0.02 USDC (wallet); account billing |
 | `get_research_sample` | Start here after connecting: show one free dated investor research case with its citations, qualifications, risks, catalysts and explicit unknowns, then offer the returned research plans link. | Free; account only |
 | `get_risks` | Retrieves evidence-linked risks for one company, research subject, investment case or the explicitly selected released corpus. | 0.02 USDC (wallet); account billing |
 | `get_search_results` | Retrieves ranked published investment cases matching thesis, investment theme or trade setup, with an optional company or subject filter. | 1.50 USDC (wallet); account billing |
 | `get_short_activity` | Retrieves retained short-interest and short-volume history for one ticker. | 0.02 USDC (wallet); account billing |
 | `get_subjects` | Retrieves matching released research subjects by name or kind, including companies, industries and investment themes. | 0.02 USDC (wallet); account billing |
-| `get_tickers` | Retrieves companies with direct research coverage and available record counts. | Free |
+| `get_tickers` | Retrieves the unfiltered directory of companies with direct research coverage and available record counts. | Free |
 | `get_visual` | Retrieves saved research charts and tables for one investment case or context assessment. | 0.02 USDC (wallet); account billing |
 
 `get_visual` lists visuals or opens one returned identifier. `get_case` includes optional relationship paths and hypothetical scenarios. `get_brief` accepts an explicit market-refresh selector. Segment, KPI and guidance coverage is bounded to admitted disclosures; absent history stays explicit.
