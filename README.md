@@ -8,6 +8,8 @@ Bring cited investor theses, risks, catalysts and research changes into your AI 
 - **Compare views:** inspect differing theses, risks, conditions and publication-based outcomes.
 - **Follow changes:** retrieve dated case revisions, engine assessments and research journals with their separate clocks.
 
+See the [dated Broadcom research example](https://beliefstate.ai/guides/ai-investing#track-thesis-changes) and download the two observations as JSON.
+
 ## Connection, authentication and pricing
 
 Both research endpoints use **Streamable HTTP**. No local server or BeliefState SDK is required.
