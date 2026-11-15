@@ -301,6 +301,10 @@ curl --fail-with-body 'https://beliefstate.ai/v1/tickers?q=NBIS'
 curl --fail-with-body https://beliefstate.ai/v1/research/get_case
 ```
 
+DevShelf lists the [BeliefState Company Coverage API](https://beliefstate.ai/v1/tickers).
+
+[![Featured on DevShelf](https://img.shields.io/badge/Featured%20on-DevShelf-7928CA?style=for-the-badge&logo=googlechrome&logoColor=white)](https://devshelf.ritualdev.in/tools/beliefstate-company-coverage-api.html)
+
 ## Maintain the catalog
 
 Export the release catalog from the main product's `beliefstate:openai-package-build` command, then run `npm run sync:catalog -- /path/to/release.catalog.json`. This updates the current tool table, prices, Postman requests, registry metadata and schema hashes from one validated inventory. Publish these artifacts after the deployed inventory matches that release.
